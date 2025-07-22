@@ -25,7 +25,7 @@ This project demonstrates how to implement **Google OAuth2 Login** using **Golan
 - 📘 Swagger UI for API Testing
 
 ---
-
+````
 ## 🛠️ Technologies Used
 
 - [Go (Gin Framework)](https://gin-gonic.com/)
