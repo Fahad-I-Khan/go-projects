@@ -32,7 +32,6 @@ This project demonstrates how to implement **Google OAuth2 Login** using **Golan
 - [GORM](https://gorm.io/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Docker](https://www.docker.com/)
-- [JWT (JSON Web Token)](https://jwt.io/)
 - [Swagger (Swaggo)](https://github.com/swaggo/swag)
 
 ---
@@ -103,6 +102,6 @@ docker-compose up -d go-app
 | ------ | ----------------------- | -------------------------------- |
 | GET    | `/api/v1/auth/login`    | Redirects to Google login        |
 | GET    | `/api/v1/auth/callback` | Google callback handler          |
-| GET    | `/api/v1/protected`     | Protected route (requires token) |
+<!-- | GET    | `/api/v1/protected`     | Protected route (requires token) | -->
 
 ---
