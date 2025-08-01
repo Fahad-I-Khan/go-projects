@@ -39,11 +39,16 @@ func RegisterRoutes(router *gin.Engine) {
 			c.JSON(http.StatusOK, gin.H{"status": "Database connected ✅"})
 		})
 
-		// ✅ Auth routes using handlers
+		// Auth routes using handlers
 		auth := v1.Group("/auth")
 		{
 			auth.GET("/login", handlers.GoogleLogin)
 			auth.GET("/callback", handlers.GoogleCallback)
+		}
+		protected := v1.Group("/protected")
+		{
+			protected.Use(handlers.CookieAuthMiddleware())
+			protected.GET("/dashboard", handlers.Dashboard)
 		}
 	}
 }

@@ -96,9 +96,40 @@ func GoogleCallback(c *gin.Context) {
 		config.DB.Create(&user)
 	}
 
+	// 5. Set cookie (example: storing email as session ID, adjust as needed)
+	c.SetCookie("session_token", user.Email, 3600, "/", "localhost", false, true)
+
 	// 5. Respond to client
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 		"user":    user,
 	})
+}
+
+func CookieAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cookie, err := c.Request.Cookie("session_token")
+		if err != nil || cookie.Value == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: No session"})
+			return
+		}
+
+		// Optionally verify if session ID exists in DB or cache
+		c.Next()
+	}
+}
+
+func Dashboard(c *gin.Context) {
+    // ✅ Try to get the session_token cookie
+    sessionToken, err := c.Cookie("session_token")
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: No session"})
+        return
+    }
+
+    // ✅ Just return the token for now to confirm it works
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Welcome to dashboard",
+        "user":    sessionToken,
+    })
 }

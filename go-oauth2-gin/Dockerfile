@@ -41,7 +41,7 @@ ENV GOOS=linux
 ENV GOARCH=amd64
 
 # Build Go binary
-RUN GOOS=linux GOARCH=amd64 go build -o api .
+RUN go build -o api .
 
 # # Debug log: is binary built?
 # RUN echo "🔍 After build:" && ls -la
