@@ -9,6 +9,9 @@ services:
       - "8080:8080"
     depends_on:
       - go_db
+    volumes:
+      - .:/app         # Mount code for hot reload
+      - go_mod_cache:/go/pkg/mod  # Optional: speeds up rebuilds
     environment:
       DB_HOST: go_db
       DB_PORT: 5432
@@ -33,3 +36,4 @@ services:
 
 volumes:
   pgdata:
+  go_mod_cache:
