@@ -2,7 +2,7 @@
 # 🚀 Google OAuth2 Authentication with Go (Gin + GORM + Docker)
 
 This project demonstrates how to implement **Google OAuth2 Login** using **Golang's Gin framework**, along with **PostgreSQL**, **Docker**, **JWT**, and **Swagger** for API documentation.
-
+````
 ---
 
 ## 📚 Table of Contents
@@ -22,10 +22,11 @@ This project demonstrates how to implement **Google OAuth2 Login** using **Golan
 - ⚙️ Protected Routes
 - 🧵 GORM Integration with PostgreSQL
 - 🔄 Docker Support for Backend and Database
+- ♻️ Air for Hot Reloading
 - 📘 Swagger UI for API Testing
 
 ---
-````
+
 ## 🛠️ Technologies Used
 
 - [Go (Gin Framework)](https://gin-gonic.com/)
@@ -33,6 +34,7 @@ This project demonstrates how to implement **Google OAuth2 Login** using **Golan
 - [PostgreSQL](https://www.postgresql.org/)
 - [Docker](https://www.docker.com/)
 - [Swagger (Swaggo)](https://github.com/swaggo/swag)
+- [Air (Hot Reloading)](https://github.com/cosmtrek/air)
 
 ---
 
@@ -102,6 +104,35 @@ docker-compose up -d go-app
 | ------ | ----------------------- | -------------------------------- |
 | GET    | `/api/v1/auth/login`    | Redirects to Google login        |
 | GET    | `/api/v1/auth/callback` | Google callback handler          |
-<!-- | GET    | `/api/v1/protected`     | Protected route (requires token) | -->
+| GET    | `/api/v1/protected`     | Protected route (requires token) |
+
+---
+
+## 🔁 Development with Air
+
+**Air** is used for hot reloading during development so that you don’t need to manually restart the app on code changes.
+
+### Install Air
+
+```bash
+go install github.com/air-verse/air@latest
+```
+This  worked for me.
+```bash
+go install github.com/cosmtrek/air@latest
+```
+Depending on moddule files.
+
+
+### Why Air instead of `go build`?
+
+Air automatically **watches your file changes** and **rebuilds & restarts** the server. You **don't need to run `go build` or `go run` manually** every time you change code. This saves time during development.
+
+---
+
+## 👤 Author
+
+**Fahad I Khan**
+GitHub: [Fahad-I-Khan](https://github.com/Fahad-I-Khan)
 
 ---
