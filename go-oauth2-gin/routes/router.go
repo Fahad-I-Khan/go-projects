@@ -10,7 +10,14 @@ import (
 import ginSwagger "github.com/swaggo/gin-swagger"
 import swaggerFiles "github.com/swaggo/files"
 
-
+func SetupRoutes(router *gin.Engine) {
+	// A simple health check route
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
+}
 
 func RegisterRoutes(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -47,7 +54,7 @@ func RegisterRoutes(router *gin.Engine) {
 		}
 		protected := v1.Group("/protected")
 		{
-			protected.Use(handlers.CookieAuthMiddleware())
+			protected.Use(handlers.AuthRequired())
 			protected.GET("/dashboard", handlers.Dashboard)
 		}
 	}

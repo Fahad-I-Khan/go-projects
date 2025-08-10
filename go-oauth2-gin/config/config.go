@@ -13,12 +13,14 @@ import (
 )
 
 var DB *gorm.DB
+var EncryptKey string
 
 func LoadEnv() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	EncryptKey = os.Getenv("ENCRYPT_SECRET_KEY")
 }
 
 func ConnectDB() {

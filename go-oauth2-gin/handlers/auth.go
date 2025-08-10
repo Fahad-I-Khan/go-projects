@@ -8,7 +8,7 @@ import (
 
 	"go-oauth2-gin/config"
 	"go-oauth2-gin/models"
-
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -32,7 +32,6 @@ func InitOAuthConfig() {
 // @Success 302 {string} string "redirect to Google"
 // @Router /api/v1/auth/login [get]
 func GoogleLogin(c *gin.Context) {
-	// Redirect user to Google login
 	url := googleOauthConfig.AuthCodeURL("randomstate", oauth2.AccessTypeOffline)
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
@@ -96,40 +95,81 @@ func GoogleCallback(c *gin.Context) {
 		config.DB.Create(&user)
 	}
 
-	// 5. Set cookie (example: storing email as session ID, adjust as needed)
-	c.SetCookie("session_token", user.Email, 3600, "/", "localhost", false, true)
+	// 5. Save user information to Redis session
+	// The `sessions.Default(c)` gets the session from the context
+	session := sessions.Default(c)
+	session.Set("user_id", user.ID) // Store the user ID in the session
+	session.Save()                  // Save the session to Redis
 
-	// 5. Respond to client
+	// 6. Respond to client
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 		"user":    user,
 	})
 }
 
-func CookieAuthMiddleware() gin.HandlerFunc {
+func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		cookie, err := c.Request.Cookie("session_token")
-		if err != nil || cookie.Value == "" {
+		session := sessions.Default(c)
+		userID := session.Get("user_id")
+
+		if userID == nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: No session"})
 			return
 		}
 
-		// Optionally verify if session ID exists in DB or cache
+		// Fetch the user from the DB and attach it to the context
+		var user models.User
+		if err := config.DB.First(&user, userID).Error; err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: User not found"})
+			return
+		}
+		c.Set("currentUser", user)
+
 		c.Next()
 	}
 }
 
 func Dashboard(c *gin.Context) {
-    // ✅ Try to get the session_token cookie
-    sessionToken, err := c.Cookie("session_token")
-    if err != nil {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: No session"})
-        return
-    }
+	// The user object is now available in the context, thanks to the AuthRequired middleware.
+	user, exists := c.Get("currentUser")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User information not found in context"})
+		return
+	}
 
-    // ✅ Just return the token for now to confirm it works
-    c.JSON(http.StatusOK, gin.H{
-        "message": "Welcome to dashboard",
-        "user":    sessionToken,
-    })
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Welcome to the dashboard",
+		"user":    user,
+	})
 }
+
+// Used for tutorial How to add middlerware to protected routes
+
+// func CookieAuthMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		cookie, err := c.Request.Cookie("session_token")
+// 		if err != nil || cookie.Value == "" {
+// 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: No session"})
+// 			return
+// 		}
+
+// 		// Optionally verify if session ID exists in DB or cache
+// 		c.Next()
+// 	}
+// }
+
+// func Dashboard(c *gin.Context) {
+//     // ✅ Try to get the session_token cookie
+//     sessionToken, err := c.Cookie("session_token")
+//     if err != nil {
+//         c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: No session"})
+//         return
+//     }
+
+//     // ✅ Just return the token for now to confirm it works
+//     c.JSON(http.StatusOK, gin.H{
+//         "message": "Welcome to dashboard",
+//         "user":    sessionToken,
+//     })
+// }
